@@ -33,7 +33,7 @@ if __name__ == "__main__":
            os.makedirs(outputDirFSkims)
     else: print "Make only the friend trees in dir ",outputDirFSkims
 
-    OPTS = ' -P '+treeDir+' --s2v -j 4 -F mjvars/t "'+treeFDir+'/evVarFriend_{cname}.root" '
+    OPTS = ' --obj treeProducerWMassEle -P '+treeDir+' --s2v -j 4 -F mjvars/t "'+treeFDir+'/evVarFriend_{cname}.root" '
 
     varsToKeep = []
     if options.varfile!=None:
@@ -41,10 +41,10 @@ if __name__ == "__main__":
             varsToKeep = f.read().splitlines()
         OPTS += "--drop '*' --keep "+" --keep ".join(varsToKeep)
     
-
     cmdSkim = "python skimTrees.py "+" ".join(mcargs)+" " + outputDirSkims + OPTS
     cmdFSkimEv = " python skimFTrees.py "+outputDirSkims+" "+treeFDir+" "+outputDirFSkims
     cmdFSkimSf = " python skimFTrees.py "+outputDirSkims+" "+treeFDir+" "+outputDirFSkims+' -f sfFriend -t "sf/t" '
+    cmdFSkimKin = " python skimFTrees.py "+outputDirSkims+" "+treeFDir+" "+outputDirFSkims+' -f kinVarFriend -t "kinvars/t" '
 
     if not options.friendOnly:
         print "Now skimming the main trees, keeping the following vars:\n",varsToKeep
@@ -54,6 +54,8 @@ if __name__ == "__main__":
     os.system(cmdFSkimEv)
     print "Now skimming the scale factors friend trees:\n"
     os.system(cmdFSkimSf)
+    print "Now skimming the kinematic variables friend trees:\n"
+    os.system(cmdFSkimKin)
 
     print "VERY DONE\n"
 

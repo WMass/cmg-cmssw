@@ -15,7 +15,9 @@ class SimpleVBoson:
         self.px1 = legs[0].Px(); self.py1 = legs[0].Py();
         self.px2 = legs[1].Px(); self.py2 = legs[1].Py();
     def pt(self):
-        return sqrt(hypot(self.pt1 + self.pt2 * cos(self.dphi), self.pt2*sin(self.dphi)))
+        return (self.legs[0]+self.legs[1]).Pt()
+    def y(self):
+        return (self.legs[0]+self.legs[1]).Rapidity()
     def mt(self):
         return sqrt(2*self.pt1*self.pt2*(1-cos(self.dphi)))
     def ux(self):
@@ -35,8 +37,8 @@ class EventVarsWmass:
         self.sample_nevt = sample_nevt
         self.isMC = not any(x in dataset for x in "DoubleMu DoubleEl DoubleEG MuEG MuonEG SingleMu SingleEl".split())
         self.electronEnergyCalibrator = ElectronCalibrator(self.isMC,
-                                                           "EgammaAnalysis/ElectronTools/data//WMass_Winter17_ResidualCorrections_ele",
-                                                           "%s/src/CMGTools/WMass/python/tools/data/systs_el_scale.txt" % os.environ['CMSSW_BASE'])
+                                                           "EgammaAnalysis/ElectronTools/data//WMass_Winter17_ResidualCorrections_smooth_ele",
+                                                           "%s/src/CMGTools/WMass/data/electronscale/systs_el_scale.txt" % os.environ['CMSSW_BASE'])
     def listBranches(self):
         self.wmass_steps = [x for x in range(0,24,2)] + [x for x in range(24,54,10)] + [x for x in range(54,141,20)]
         biglist = [ ("nLepCorr", "I"), ("iL","I",10,"nLepCorr"),
@@ -53,13 +55,13 @@ class EventVarsWmass:
         print "self.branches = ",self.branches[:]
         return self.branches[:]
     def lepIdTight(self,lep):
-        # if not lep.trgMatch: return False
+        #if not lep.trgMatch: return False
         if abs(lep.pdgId) == 13:
             if lep.pt <= 25 or abs(lep.eta)>2.1: return False
             return lep.tightId >=1 and lep.relIso04 < 0.15
         elif abs(lep.pdgId) == 11:
             if lep.pt <= 25 or abs(lep.eta)>2.5: return False
-            return lep.eleMVAId >=2 and lep.relIso03 < 0.15 and lep.convVetoFull==1
+            return lep.eleMVAId >=2 and lep.relIso04 < 0.15 and lep.convVetoFull==1
     def leadJetCleaning(self,jet):
         return jet.CHEF > 0.1 and jet.NHEF < 0.8
     def PtEtaPhi3V(self,pt,eta,phi):
@@ -86,7 +88,6 @@ class EventVarsWmass:
         ret["iL"] = []
         for il,lep in enumerate(tightleps):
             ret["iL"].append(il)
-        ret["nLepCorr"] = len(ret["iL"])
         # Define cleaned jets 
         ret["iJ"] = [];
         # 0. mark each identified jet as clean
@@ -135,11 +136,11 @@ class EventVarsWmass:
                     ret["nBTag20"] += 1
 
         # Lepton residual momentum scale corrections
+        ret["nLepCorr"] = len(leps)
         for lfloat in "eta pt pterr ptScaleUp ptScaleDn".split():
             lepret[lfloat] = []
         scaleVars=['ptScaleUp','ptScaleDn']; scaleCoeffs=[1.0,-1.0]; 
-        for il in ret["iL"]:
-            l=tightleps[il]
+        for l in leps:
             if abs(l.pdgId)==11:
                 self.electronEnergyCalibrator.correct(l,event.run)
             for lfloat in "eta pt pterr".split():
@@ -151,17 +152,17 @@ class EventVarsWmass:
         # event variables with corrected quantities (METs to be corrected)
         pfmet = self.PtEtaPhi3V(event.met_pt,0.,event.met_phi)
         tkmet = self.PtEtaPhi3V(event.tkmet_pt,0.,event.tkmet_phi)
-        tightleps_3v=[ self.PtEtaPhi3V(l.pt,l.eta,l.phi) for l in tightleps ]
+        leps_3v=[ self.PtEtaPhi3V(l.pt,l.eta,l.phi) for l in leps ]
 
         # W,Z candidates
-        if len(tightleps)>0:
-            W = SimpleVBoson([tightleps_3v[0],tkmet])
+        if len(leps)>0:
+            W = SimpleVBoson([leps_3v[0],tkmet])
             ret["w_pt"] = W.pt()
             ret["w_mt"] = W.mt()
             ret["w_ux"] = W.ux(); ret["w_uy"] = W.uy()
         else: ret["w_pt"] = ret["w_mt"] = ret["w_ux"] = ret["w_uy"] = -999
-        if len(tightleps)>1:
-            Z = SimpleVBoson(tightleps_3v[:2])
+        if len(leps)>1:
+            Z = SimpleVBoson(leps_3v[:2])
             ret["z_pt"] = Z.pt()
             ret["z_mll"] = Z.mll()
             ret["z_ux"] = Z.ux() - tkmet.Px(); ret["z_uy"] = Z.uy() - tkmet.Py()

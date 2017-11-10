@@ -7,14 +7,8 @@ MODULES = []
 
 from CMGTools.WMass.tools.eventVars_wmass import EventVarsWmass
 MODULES.append( ('vars_w', EventVarsWmass()) )
-
-#from CMGTools.TTHAnalysis.tools.vertexWeightFriend import VertexWeightFriend
-#pufile_mc="/afs/cern.ch/work/e/emanuele/public/wmass/pileup/pileup_profile_Spring16.root"
-#pufile_data="/afs/cern.ch/work/e/emanuele/public/wmass/pileup/PileupData_GoldenJSON_Full2016.root"
-#MODULES.append ( ('puWeights', VertexWeightFriend(pufile_mc,pufile_data,"pu_mc","pileup",name="puw",verbose=True,vtx_coll_to_reweight="nTrueInt") ) )
-
-#from CMGTools.MonoXAnalysis.tools.eventVetoListChecker import EventVetoListChecker
-#MODULES.append( ('eventVetoChecker', EventVetoListChecker(pathvetolists,vetoLists)) )
+from CMGTools.WMass.tools.kinematicVars import KinematicVars
+MODULES.append( ('kinvars', KinematicVars()) )
 
 class VariableProducer(Module):
     def __init__(self,name,booker,sample_nevt,dataset,modules):
@@ -26,7 +20,7 @@ class VariableProducer(Module):
         self.t = PyTree(self.book("TTree","t","t"))
         self.branches = {}
         for name,mod in self._modules:
-            if name == "vars_w": mod.initSample(self._sample_nevt,self.dataset)
+            if name=="vars_w" or name=="kinvars": mod.initSample(self._sample_nevt,self.dataset)
             for B in mod.listBranches():
                 # don't add the same branch twice
                 if B in self.branches: 

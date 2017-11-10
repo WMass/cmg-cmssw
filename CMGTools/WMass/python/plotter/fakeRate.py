@@ -30,7 +30,7 @@ class FakeRate:
 	        elif fields[0] == "cut-change": 
 	            self._cutMods.append( SimpleCorrection(fields[1],fields[2],onlyForCuts=True) )
 	        elif fields[0] == "load-histo":
-	            data = "%s/src/CMGTools/TTHAnalysis/data/" % os.environ['CMSSW_BASE'];
+	            data = "%s/src/CMGTools/WMass/data/" % os.environ['CMSSW_BASE'];
                     fname = fields[2].replace("$DATA",data)
                     hname = fields[3] if len(fields) >= 4 else fields[1]
                     if fields[1] in _loads:

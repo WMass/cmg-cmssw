@@ -1,5 +1,5 @@
 #!/bin/tcsh
-# usage: ./setup_trees_80X.csh <rel53X> <rel80X>
+# usage: source setup_trees_80X.csh <rel53X> <rel80X>
 
 setenv rel53X $1
 setenv rel80X $2

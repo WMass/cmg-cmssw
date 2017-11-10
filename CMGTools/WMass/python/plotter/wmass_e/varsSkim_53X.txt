@@ -6,6 +6,7 @@ HLT_SingleMu
 HLT_SingleEl
 HLT_DoubleEl
 HLT_DoubleMu
+HLT_FR_1e
 puWeight
 pdfWeight_CT10
 pdfWeight_cteq6ll
@@ -64,6 +65,10 @@ LepGood_superCluster_rawEnergy
 LepGood_superCluster_preshowerEnergy
 LepGood_superCluster_energy
 LepGood_eSuperClusterOverP
+LepGood_mcMatchId
+LepGood_mcMatchAny
+LepGood_mcMatchAny2
+LepGood_mcMatchTau
 nJet
 Jet_pt
 Jet_eta
