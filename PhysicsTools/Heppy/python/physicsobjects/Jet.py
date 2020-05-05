@@ -100,15 +100,25 @@ class Jet(PhysicsObject):
         if not self.isPFJet():
             raise RuntimeError("jetID implemented only for PF Jets")
         eta = abs(self.eta());
-        energy = self.rawEnergy();
-        chf = self.chargedHadronEnergy()/energy;
-        nhf = self.neutralHadronEnergy()/energy;
-        phf = self.neutralEmEnergy()/energy;
-        muf = self.muonEnergy()/energy;
-        elf = self.chargedEmEnergy()/energy;
-        chm = self.chargedHadronMultiplicity();
+        # since these must be PF jets, I can use directly the methods to get fractions
+        # which seems to be the recommended way
+        chf = self.chargedHadronEnergyFraction();
+        nhf = self.neutralHadronEnergyFraction();
+        phf = self.neutralEmEnergyFraction();
+        muf = self.muonEnergyFraction();
+        elf = self.chargedEmEnergyFraction();
         npr = self.chargedMultiplicity() + self.neutralMultiplicity();
         npn = self.neutralMultiplicity();
+        chm = self.chargedMultiplicity(); # was self.chargedHadronMultiplicity(); 
+        #energy = self.rawEnergy();
+        #chf = self.chargedHadronEnergy()/energy;
+        #nhf = self.neutralHadronEnergy()/energy;
+        #phf = self.neutralEmEnergy()/energy;
+        #muf = self.muonEnergy()/energy;
+        #elf = self.chargedEmEnergy()/energy;
+        #chm = self.chargedHadronMultiplicity(); # should probably have been self.chargedMultiplicity()
+        #npr = self.chargedMultiplicity() + self.neutralMultiplicity();
+        #npn = self.neutralMultiplicity();
         #if npr != self.nConstituents():
         #    import pdb; pdb.set_trace()
         if name == "POG_PFID":  
@@ -143,10 +153,17 @@ class Jet(PhysicsObject):
 
     def puJetId(self, label="pileupJetId:fullDiscriminant", tuning="80X", wp="loose"):
         '''Full mva PU jet id'''
+        # label only used when tuning is for last one below
+        # could be done also for 80X using PuJetIDWP80X(), but there is a simpler method used below
+
         if tuning == '80X':
-            # https://twiki.cern.ch/twiki/bin/view/CMS/PileupJetID#Information_for_13_TeV_data_anal
-            # Note: The following only works for miniAOD v2 - return true
-            #       otherwise
+            
+            ## better the way used below
+            # puId80X = PuJetIDWP80X()
+            # return puId80X.passWP(self,wp)
+
+            #https://twiki.cern.ch/twiki/bin/view/CMS/PileupJetID#Working_points
+            # Note: The following only works for miniAOD v2 or v3 - return true otherwise
 
             # Training only performed up to 50 GeV, return pass above per
             # recommendation from JME algo subgroup

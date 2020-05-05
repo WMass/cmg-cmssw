@@ -409,7 +409,7 @@ class JetAnalyzer( Analyzer ):
         
 
     def testJetID(self, jet):
-        jet.puJetIdPassed = jet.puJetId() 
+        jet.puJetIdPassed = jet.puJetId() # default used 80X version from miniaod 
         jet.pfJetIdPassed = jet.jetID('POG_PFID_Loose') 
         if self.cfg_ana.relaxJetId:
             return True
@@ -418,8 +418,7 @@ class JetAnalyzer( Analyzer ):
         
     def testJetNoID( self, jet ):
         # 2 is loose pile-up jet id
-        return jet.pt()*(max(1,jet.corrJECUp/jet.corr,jet.corrJECDown/jet.corr) if self.jetPtOrUpOrDnSelection else 1) > self.cfg_ana.jetPt and \
-               abs( jet.eta() ) < self.cfg_ana.jetEta;
+        return jet.pt()*(max(1,jet.corrJECUp/jet.corr,jet.corrJECDown/jet.corr) if self.jetPtOrUpOrDnSelection else 1) > self.cfg_ana.jetPt and abs( jet.eta() ) < self.cfg_ana.jetEta;
 
     def jetFlavour(self,event):
         def isFlavour(x,f):
